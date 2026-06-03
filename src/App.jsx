@@ -1,212 +1,250 @@
 import { useState, useRef, useEffect } from "react";
+import "./App.css";
 
 function App() {
   const [entered, setEntered] = useState(false);
-  const videoRef = useRef(null);
   const [showText, setShowText] = useState(false);
   const [showCards, setShowCards] = useState(false);
+  const [selectedMood, setSelectedMood] = useState(null); 
+  const [phase, setPhase] = useState("FORM"); // FORM -> SUGGESTIONS
+  const [reflection, setReflection] = useState("");
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false); // Controls the floating stats view
+  
+  const videoRef = useRef(null);
+
+  // Persistent localStorage History Engine
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem("moodora_history");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const handleWelcome = () => {
     setEntered(true);
-
-    setTimeout(() => {
-      setShowText(true);
-    }, 1000);
-
-    setTimeout(() => {
-      setShowCards(true);
-    }, 1800);
+    setTimeout(() => setShowText(true), 1000);
+    setTimeout(() => setShowCards(true), 1800);
   };
+
+  const handleMoodSelect = (moodText) => {
+    setSelectedMood(moodText);
+    setPhase("FORM"); // Ensure we look at the reflection textarea first
+  };
+
   useEffect(() => {
-  const video = videoRef.current;
+    const video = videoRef.current;
+    if (video) {
+      const handleLoaded = () => (video.playbackRate = 0.45);
+      video.addEventListener("loadeddata", handleLoaded);
+      return () => video.removeEventListener("loadeddata", handleLoaded);
+    }
+  }, []);
 
-  if (video) {
-    const handleLoaded = () => {
-      video.playbackRate = 0.45;
-    };
+  const getThemeClass = () => {
+    if (!selectedMood) return "theme-default";
+    return `theme-${selectedMood.toLowerCase()}`;
+  };
 
-    video.addEventListener("loadeddata", handleLoaded);
-
-    return () => {
-      video.removeEventListener("loadeddata", handleLoaded);
-    };
-  }
-}, []);
+  // Modern Minimal SVG Icons Array replacing raw emojis
+  const moodIcons = {
+    Happy: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-svg">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round" />
+        <line x1="9" y1="9" x2="9.01" y2="9" strokeLinecap="round" strokeWidth="3" />
+        <line x1="15" y1="9" x2="15.01" y2="9" strokeLinecap="round" strokeWidth="3" />
+      </svg>
+    ),
+    Neutral: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-svg">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="8" y1="15" x2="16" y2="15" strokeLinecap="round" />
+        <line x1="9" y1="9" x2="9.01" y2="9" strokeLinecap="round" strokeWidth="3" />
+        <line x1="15" y1="9" x2="15.01" y2="9" strokeLinecap="round" strokeWidth="3" />
+      </svg>
+    ),
+    Sad: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-svg">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M16 16s-1.5-2-4-2-4 2-4 2" strokeLinecap="round" />
+        <line x1="9" y1="9" x2="9.01" y2="9" strokeLinecap="round" strokeWidth="3" />
+        <line x1="15" y1="9" x2="15.01" y2="9" strokeLinecap="round" strokeWidth="3" />
+      </svg>
+    ),
+    Tired: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-svg">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+      </svg>
+    )
+  };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        overflow: "hidden",
-        position: "relative",
-        fontFamily: "Arial",
-      }}
-    >
-      {/* VIDEO BACKGROUND */}
+    <div className={`app-container ${getThemeClass()}`}>
+      
+      {/* 1. CONSTANT BACKGROUND VIDEO */}
       <video
         src="/bg.mp4.mp4"
         autoPlay
         muted
         loop
         playsInline
-        playbackRate={0.6}
         ref={videoRef}
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          transform: "translate(-50%, -50%)",
-          transition: "1.5s ease",
-          filter: entered
-            ? "blur(3px) brightness(0.72)"
-            : "blur(0px) brightness(1)",
-        }}
+        className={`bg-video ${entered ? "video-blur" : ""}`}
       />
 
-      {/* DARK OVERLAY */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background: entered
-            ? "linear-gradient(to bottom, rgba(20,20,35,0.22), rgba(25,15,40,0.18))"
-            : "rgba(0,0,0,0.12)",
-          transition: "1.5s ease",
-        }}
-      />
+      {/* 2. ATMOSPHERIC SHADING */}
+      <div className="environment-wash">
+        {selectedMood === "Happy" && <div className="happy-sunlight-particles"></div>}
+        {selectedMood === "Neutral" && <div className="neutral-cloud-drift"></div>}
+        {selectedMood === "Sad" && <div className="sad-light-rain"></div>}
+        {selectedMood === "Tired" && (
+          <>
+            <div className="tired-moon-glow"></div>
+            <div className="firefly-particle f1"></div>
+            <div className="firefly-particle f2"></div>
+          </>
+        )}
+      </div>
+      <div className={`overlay ${entered ? "overlay-dark" : "overlay-light"}`} />
 
-      {/* FIRST SCREEN */}
-      {!entered && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
+      {/* 3. PERSISTENT CORNER SYMBOL FOR ANALYTICS (Available after entering) */}
+      {entered && (
+        <button 
+          className="corner-analytics-trigger"
+          onClick={() => setShowAnalyticsModal(!showAnalyticsModal)}
+          title="Mood Analytics"
         >
-          <button
-            onClick={handleWelcome}
-            style={{
-              padding: "18px 60px",
-              borderRadius: "60px",
-              border: "1px solid rgba(255,255,255,0.25)",
-              background:
-                "linear-gradient(to bottom, rgba(192,132,252,0.85), rgba(126,34,206,0.82))",
-              color: "white",
-              fontSize: "24px",
-              fontWeight: "bold",
-              cursor: "pointer",
-              boxShadow: "0 0 30px rgba(192,132,252,0.45)",
-              backdropFilter: "blur(10px)",
-              transition: "0.3s ease",
-            }}
-          >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="18" y1="20" x2="18" y2="10" strokeLinecap="round" />
+            <line x1="12" y1="20" x2="12" y2="4" strokeLinecap="round" />
+            <line x1="6" y1="20" x2="6" y2="14" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
+
+      {/* ANALYTICS POPUP CARD POSITIONED AT CORNER */}
+      {showAnalyticsModal && (
+        <div className="corner-analytics-card fade-in">
+          <h4>Mood Analytics</h4>
+          <div className="metrics-bars-container">
+            {["Happy", "Neutral", "Sad", "Tired"].map((moodName) => {
+              const total = history.length || 1;
+              const count = history.filter(item => item.mood === moodName).length;
+              const percentage = history.length ? Math.round((count / total) * 100) : 0;
+
+              return (
+                <div key={moodName} className="analytics-row">
+                  <div className="bar-labels">
+                    <span>{moodName}</span>
+                    <span>{percentage}%</span>
+                  </div>
+                  <div className="bar-track">
+                    <div className={`bar-fill fill-${moodName.toLowerCase()}`} style={{ width: `${percentage}%` }}></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* FIRST SCREEN: LANDING SPACE */}
+      {!entered && (
+        <div className="center-wrapper">
+          <button onClick={handleWelcome} className="welcome-btn">
             Welcome
           </button>
         </div>
       )}
 
-      {/* SECOND SCREEN CONTENT */}
-      {entered && (
+      {/* MOOD SELECTION CARDS VIEW */}
+      {entered && !selectedMood && (
         <>
-          {/* TEXT */}
-          <div
-            style={{
-              position: "absolute",
-              top: "18%",
-              width: "100%",
-              textAlign: "center",
-              opacity: showText ? 1 : 0,
-              transition: "1.5s ease",
-            }}
-          >
-            <h1
-              style={{
-                color: "white",
-                fontSize: "48px",
-                fontWeight: "600",
-                letterSpacing: "1px",
-                textShadow: "0 4px 20px rgba(0,0,0,0.4)",
-              }}
-            >
-              How are you feeling today?
-            </h1>
-
-            <p
-              style={{
-                color: "rgba(255,255,255,0.75)",
-                marginTop: "12px",
-                fontSize: "18px",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Moodora adapts with your emotions ✨
-            </p>
+          <div className={`text-container ${showText ? "fade-in" : "hidden"}`}>
+            <h1>How are you feeling today?</h1>
+            <p>Moodora adapts with your emotions ✨</p>
           </div>
 
-          {/* MOOD BUTTONS */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: "65px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              display: "flex",
-              gap: "22px",
-              opacity: showCards ? 1 : 0,
-              transition: "1.5s ease",
-            }}
-          >
+          <div className={`mood-grid ${showCards ? "fade-in" : "hidden"}`}>
             {[
-              { emoji: "🌞", text: "Happy" },
-              { emoji: "☁️", text: "Neutral" },
-              { emoji: "🌧️", text: "Sad" },
-              { emoji: "😴", text: "Tired" },
+              { label: "Happy", text: "Happy" },
+              { label: "Neutral", text: "Neutral" },
+              { label: "Sad", text: "Sad" },
+              { label: "Tired", text: "Tired" },
             ].map((mood, index) => (
-              <div
-                key={index}
-                style={{
-                  width: "135px",
-                  height: "150px",
-                  borderRadius: "30px",
-                  background: "rgba(255,255,255,0.12)",
-                  backdropFilter: "blur(14px)",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  boxShadow: "0 8px 25px rgba(0,0,0,0.18)",
-                  transition: "0.3s ease",
-                }}
-              >
-                <div style={{ fontSize: "46px" }}>
-                  {mood.emoji}
-                </div>
-
-                <p
-                  style={{
-                    color: "white",
-                    marginTop: "12px",
-                    fontSize: "18px",
-                    fontWeight: "600",
-                  }}
-                >
-                  {mood.text}
-                </p>
+              <div key={index} className="mood-card" onClick={() => handleMoodSelect(mood.text)}>
+                <div className="symbol-wrap">{moodIcons[mood.label]}</div>
+                <p>{mood.text}</p>
               </div>
             ))}
           </div>
         </>
+      )}
+
+      {/* INTERACTIVE WORKSPACE: REFLECTION FORM STEP */}
+      {selectedMood && phase === "FORM" && (
+        <div className="reflection-card fade-in">
+          <div className="reflection-header">
+            <h2>How are you feeling today?</h2>
+            <p>Jot down your current mindset to unlock optimized workflow steps.</p>
+          </div>
+          <textarea
+            className="reflection-textarea"
+            placeholder="Write anything on your mind..."
+            value={reflection}
+            onChange={(e) => setReflection(e.target.value)}
+          ></textarea>
+          <div className="reflection-actions">
+            <button className="back-btn" onClick={() => setSelectedMood(null)}>← Back</button>
+            <button 
+              className="save-btn"
+              onClick={() => {
+                const newEntry = { id: Date.now(), mood: selectedMood, text: reflection, date: new Date().toLocaleDateString() };
+                const updatedHistory = [newEntry, ...history];
+                setHistory(updatedHistory);
+                localStorage.setItem("moodora_history", JSON.stringify(updatedHistory));
+                setPhase("SUGGESTIONS"); // Step directly into recommendations phase!
+              }}
+            >
+              Save Reflection ✨
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* INTERACTIVE WORKSPACE: ADAPTIVE SUGGESTIONS STEP */}
+      {selectedMood && phase === "SUGGESTIONS" && (
+        <div className="dashboard-card fade-in">
+          <div className="suggestions-section">
+            <h3>Adaptive Focus Suggestions</h3>
+            <p className="suggestion-subtext">Optimized activities tailored for your <strong>{selectedMood}</strong> mindset:</p>
+            <div className="tasks-deck">
+              {{
+                Happy: ["Sing Dance", "Build project", "Learn new topic", "Solve DSA"],
+                Neutral: ["Continue current work", "Read documentation", "Refactor code"],
+                Sad: ["Take a short walk", "Write thoughts", "Review existing work"],
+                Tired: ["Organize files", "Update README", "Plan tomorrow"]
+              }[selectedMood].map((task, idx) => (
+                <div key={idx} className="task-action-item">
+                  <span className="task-checkbox">✦</span>
+                  <p>{task}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <button 
+            className="return-sanctuary-btn"
+            onClick={() => {
+              setSelectedMood(null);
+              setReflection("");
+              setPhase("FORM");
+            }}
+          >
+            Reset Space
+          </button>
+        </div>
       )}
     </div>
   );
 }
 
 export default App;
+
