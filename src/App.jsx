@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import "./App.css";
+import WelcomeScreen from "./components/WelcomeScreen";
+import BackgroundVideo from "./components/BackgroundVideo";
 
 function App() {
   const [entered, setEntered] = useState(false);
@@ -14,8 +16,14 @@ function App() {
 
   // Persistent localStorage History Engine
   const [history, setHistory] = useState(() => {
-    const saved = localStorage.getItem("moodora_history");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved =
+        localStorage.getItem("moodora_history");
+
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
   });
 
   const handleWelcome = () => {
@@ -76,19 +84,48 @@ function App() {
     )
   };
 
+  const moods = [
+    { label: "Happy", text: "Happy" },
+    { label: "Neutral", text: "Neutral" },
+    { label: "Sad", text: "Sad" },
+    { label: "Tired", text: "Tired" },
+  ];
+
+  const moodSuggestions = {
+    Happy: [
+      "Sing Dance",
+      "Build project",
+      "Learn new topic",
+      "Solve DSA",
+    ],
+
+    Neutral: [
+      "Continue current work",
+      "Read documentation",
+      "Refactor code",
+    ],
+
+    Sad: [
+      "Take a short walk",
+      "Write thoughts",
+      "Review existing work",
+    ],
+
+    Tired: [
+      "Organize files",
+      "Update README",
+      "Plan tomorrow",
+    ],
+  };
+
   return (
     <div className={`app-container ${getThemeClass()}`}>
       
       {/* 1. CONSTANT BACKGROUND VIDEO */}
-      <video
-        src="/bg.mp4.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-        ref={videoRef}
-        className={`bg-video ${entered ? "video-blur" : ""}`}
-      />
+      <BackgroundVideo
+      entered={entered}
+      videoRef={videoRef}
+    />
 
       {/* 2. ATMOSPHERIC SHADING */}
       <div className="environment-wash">
@@ -120,7 +157,7 @@ function App() {
         </button>
       )}
 
-      {/* ANALYTICS POPUP CARD POSITIONED AT CORNER */}
+      {/* ANALYTICS POPUP CARD */}
       {showAnalyticsModal && (
         <div className="corner-analytics-card fade-in">
           <h4>Mood Analytics</h4>
@@ -148,11 +185,9 @@ function App() {
 
       {/* FIRST SCREEN: LANDING SPACE */}
       {!entered && (
-        <div className="center-wrapper">
-          <button onClick={handleWelcome} className="welcome-btn">
-            Welcome
-          </button>
-        </div>
+        <WelcomeScreen
+          onWelcome={handleWelcome}
+        />
       )}
 
       {/* MOOD SELECTION CARDS VIEW */}
@@ -164,16 +199,19 @@ function App() {
           </div>
 
           <div className={`mood-grid ${showCards ? "fade-in" : "hidden"}`}>
-            {[
-              { label: "Happy", text: "Happy" },
-              { label: "Neutral", text: "Neutral" },
-              { label: "Sad", text: "Sad" },
-              { label: "Tired", text: "Tired" },
-            ].map((mood, index) => (
-              <div key={index} className="mood-card" onClick={() => handleMoodSelect(mood.text)}>
-                <div className="symbol-wrap">{moodIcons[mood.label]}</div>
+            {moods.map((mood, index) => (
+              <button
+                key={index}
+                type="button"
+                className="mood-card"
+                onClick={() => handleMoodSelect(mood.text)}
+              >
+                <div className="symbol-wrap">
+                  {moodIcons[mood.label]}
+                </div>
+
                 <p>{mood.text}</p>
-              </div>
+              </button>
             ))}
           </div>
         </>
@@ -194,14 +232,33 @@ function App() {
           ></textarea>
           <div className="reflection-actions">
             <button className="back-btn" onClick={() => setSelectedMood(null)}>← Back</button>
-            <button 
+            <button
               className="save-btn"
+              disabled={!reflection.trim()}
               onClick={() => {
-                const newEntry = { id: Date.now(), mood: selectedMood, text: reflection, date: new Date().toLocaleDateString() };
+
+                if (!reflection.trim()) {
+                  alert("Please write something first.");
+                  return;
+                }
+
+                const newEntry = {
+                  id: Date.now(),
+                  mood: selectedMood,
+                  text: reflection,
+                  date: new Date().toLocaleDateString()
+                };
+
                 const updatedHistory = [newEntry, ...history];
+
                 setHistory(updatedHistory);
-                localStorage.setItem("moodora_history", JSON.stringify(updatedHistory));
-                setPhase("SUGGESTIONS"); // Step directly into recommendations phase!
+
+                localStorage.setItem(
+                  "moodora_history",
+                  JSON.stringify(updatedHistory)
+                );
+
+                setPhase("SUGGESTIONS");
               }}
             >
               Save Reflection ✨
@@ -217,12 +274,7 @@ function App() {
             <h3>Adaptive Focus Suggestions</h3>
             <p className="suggestion-subtext">Optimized activities tailored for your <strong>{selectedMood}</strong> mindset:</p>
             <div className="tasks-deck">
-              {{
-                Happy: ["Sing Dance", "Build project", "Learn new topic", "Solve DSA"],
-                Neutral: ["Continue current work", "Read documentation", "Refactor code"],
-                Sad: ["Take a short walk", "Write thoughts", "Review existing work"],
-                Tired: ["Organize files", "Update README", "Plan tomorrow"]
-              }[selectedMood].map((task, idx) => (
+              {moodSuggestions[selectedMood].map((task, idx) => (
                 <div key={idx} className="task-action-item">
                   <span className="task-checkbox">✦</span>
                   <p>{task}</p>

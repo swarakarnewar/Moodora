@@ -295,8 +295,10 @@ p { color: rgba(255,255,255,0.8); margin-top: 10px; font-size: 16px; }
   gap: 20px;
 }
 
-.reflection-header text-align: left; {
+.reflection-header{
+  text-align: left;
 }
+
 .reflection-header h2 {
   font-size: 24px;
   font-weight: 600;
@@ -373,6 +375,11 @@ p { color: rgba(255,255,255,0.8); margin-top: 10px; font-size: 16px; }
 .save-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(255, 255, 255, 0.25);
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Responsive adjustment for small viewports */
