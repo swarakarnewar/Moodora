@@ -14,6 +14,12 @@ function App() {
   
   const videoRef = useRef(null);
 
+  const formattedDate = new Date().toLocaleDateString("en-US", {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+  });
+
   // Persistent localStorage History Engine
   const [history, setHistory] = useState(() => {
     try {
@@ -195,7 +201,12 @@ function App() {
         <>
           <div className={`text-container ${showText ? "fade-in" : "hidden"}`}>
             <h1>How are you feeling today?</h1>
-            <p>Moodora adapts with your emotions ✨</p>
+
+            <div className="date-indicator">
+              {formattedDate}
+            </div>
+            
+            <p>Take a moment to check in with yourself</p>
           </div>
 
           <div className={`mood-grid ${showCards ? "fade-in" : "hidden"}`}>

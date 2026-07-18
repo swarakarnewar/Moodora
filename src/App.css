@@ -10,6 +10,14 @@
   transition: background 3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+.date-indicator {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
 /* =========================================
    THE HIGH-END REALM MIXERS (Colors blended INSIDE environment)
    ========================================= */
@@ -58,6 +66,12 @@
   z-index: 0;
   transition: filter 2.5s ease;
 }
+@media (max-width: 600px) {
+  .bg-video {
+    object-position: 33% center;
+  }
+}
+
 .video-blur { filter: blur(6px) brightness(0.65); }
 /* Once selected, remove blur completely so they can feel the crisp nature asset */
 .theme-happy .video-blur,
