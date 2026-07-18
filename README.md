@@ -1,16 +1,111 @@
-# React + Vite
+# Moodora 🌿
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> A space to pause, reflect, and understand how you feel.
 
-Currently, two official plugins are available:
+Moodora is a mood-aware productivity experience designed around a simple idea:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**Your environment should respond to your state of mind.**
 
-## React Compiler
+Instead of treating productivity as the same experience for everyone, Moodora begins with a quick emotional check-in and adapts the atmosphere and suggested activities based on the user's mood.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ✨ The Experience
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 1. Pause & Check In
+
+The experience begins with a calm, distraction-free space where users can pause and check in with themselves.
+
+![Moodora Welcome Screen](./screenshots/Welcome.png)
+
+### 2. Choose Your Mood
+
+Users select how they currently feel:
+
+- 😊 Happy
+- 😐 Neutral
+- 😔 Sad
+- 🌙 Tired
+
+![Mood Selection](./screenshots/Mood_selection.png)
+
+### 3. Reflect
+
+Users can write down what's currently on their mind before moving forward.
+
+### 4. Adapt
+
+Based on the selected mood, Moodora changes the surrounding environment and provides mood-aware focus suggestions.
+
+### 5. Understand Your Patterns
+
+Moodora stores mood history locally and provides basic analytics to help users observe their emotional patterns over time.
+
+---
+
+## 🌈 Environment-Aware Experience
+
+Moodora's visual environment changes based on the selected mood, creating a different atmosphere for different emotional states.
+
+![Mood-Responsive Environment](./screenshots/Mood-environments.png)
+
+The same space can feel different depending on how the user feels.
+
+---
+
+## 🧠 Core Idea
+
+Most productivity tools ask:
+
+> **"What do you need to do?"**
+
+Moodora first asks:
+
+> **"How are you feeling?"**
+
+The idea is simple: productivity experiences should consider the user's current state of mind instead of treating every user and every moment the same.
+
+---
+
+## 🚀 Current Features
+
+- Mood-based check-in
+- Daily date indicator
+- Reflection space
+- Mood-adaptive visual environments
+- Personalized focus suggestions
+- Mood history stored locally
+- Basic mood analytics
+- Responsive interface
+
+---
+
+## 🛠️ Tech Stack
+
+- React
+- JavaScript
+- HTML
+- CSS
+- LocalStorage
+- Vite
+
+---
+
+## 📌 Project Status
+
+Moodora is an evolving personal project.
+
+The current version focuses on establishing the core experience:
+
+**Check in → Reflect → Adapt → Focus**
+
+More features and refinements are planned as the project develops.
+
+---
+
+## 💡 Why I Built This
+
+I wanted to explore what happens when productivity interfaces respond not only to what a user wants to accomplish, but also to how they currently feel.
+
+Moodora is an experiment in building a more emotionally aware and environment-driven digital experience.
+
